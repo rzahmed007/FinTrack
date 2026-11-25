@@ -6,7 +6,11 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { DEFAULT_CATEGORIES, DEFAULT_USER_ID, createDefaultBudgetConfig } from '@/data/defaults';
+import {
+  DEFAULT_CATEGORIES,
+  DEFAULT_USER_ID,
+  createEmptyBudgetConfig,
+} from '@/data/defaults';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import type { CreateTransactionInput } from '@/repositories/interfaces';
@@ -106,7 +110,7 @@ interface FinanceContextValue {
   addSavingsTransfer: (
     transfer: Omit<SavingsTransfer, 'id' | 'userId' | 'createdAt'>,
   ) => Promise<SavingsTransfer>;
-  resetDemoData: () => Promise<void>;
+  clearAllData: () => Promise<void>;
   refreshAll: () => Promise<void>;
 }
 
@@ -135,7 +139,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [budgetConfig, setBudgetConfig] = useState<BudgetConfig>(() =>
-    createDefaultBudgetConfig(DEFAULT_USER_ID),
+    createEmptyBudgetConfig(DEFAULT_USER_ID),
   );
   const [emis, setEmis] = useState<EMIItem[]>([]);
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
@@ -406,13 +410,13 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     [repos, userId, showToast],
   );
 
-  const resetDemoData = useCallback(async () => {
-    await repos.resetDemoData();
+  const clearAllData = useCallback(async () => {
+    await repos.clearAllData();
     await refreshAll();
     showToast({
       variant: 'success',
-      title: 'Demo data restored',
-      description: 'All sample transactions, budgets, EMIs and goals reset.',
+      title: 'Local data cleared',
+      description: 'All transactions, budgets, EMIs and savings goals reset to empty.',
     });
   }, [repos, refreshAll, showToast]);
 
@@ -515,7 +519,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         upsertSavingsGoal,
         deleteSavingsGoal,
         addSavingsTransfer,
-        resetDemoData,
+        clearAllData,
         refreshAll,
       }}
     >

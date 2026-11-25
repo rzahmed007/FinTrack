@@ -16,7 +16,6 @@ import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useAuth } from '@/contexts/AuthContext';
-import { DEMO_USER } from '@/data/demoData';
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -38,8 +37,8 @@ export function LoginPage() {
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: DEMO_USER.email,
-      password: 'demo-user',
+      email: '',
+      password: '',
       rememberMe: true,
     },
   });
@@ -49,7 +48,7 @@ export function LoginPage() {
   }
 
   const onSubmit = async (values: LoginValues) => {
-    await new Promise((r) => setTimeout(r, 250));
+    await new Promise((r) => setTimeout(r, 200));
     await signIn(values);
   };
 
@@ -85,8 +84,8 @@ export function LoginPage() {
 
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div className="rounded-[20px] border border-white/15 bg-white/5 p-4">
-              <p className="text-xs text-white/60">Default Salary Plan</p>
-              <p className="mt-1 text-xl font-extrabold tabular-nums">₹15,000</p>
+              <p className="text-xs text-white/60">Storage Mode</p>
+              <p className="mt-1 text-xl font-extrabold">LocalStorage</p>
             </div>
             <div className="rounded-[20px] border border-white/15 bg-white/5 p-4">
               <p className="text-xs text-white/60">Daily Entry Speed</p>
@@ -96,7 +95,7 @@ export function LoginPage() {
         </div>
 
         <p className="text-xs text-white/50">
-          Phase 1 Frontend Demo • LocalStorage persistence • Ready for Supabase Auth
+          Phase 1 Frontend • Browser LocalStorage persistence • Ready for Supabase Auth
         </p>
       </aside>
 
@@ -126,20 +125,20 @@ export function LoginPage() {
               Single-User Private Workspace
             </span>
             <h1 className="text-3xl font-extrabold tracking-tight text-foreground pt-2">
-              Welcome back
+              Sign in to FinTrack
             </h1>
             <p className="text-sm text-muted-foreground">
-              Sign in to access your FinTrack ledger and monthly budgets.
+              Enter your email and password to open your local ledger.
             </p>
           </div>
 
           <div className="rounded-2xl border border-border bg-surface-secondary/70 px-4 py-3 text-xs text-muted-foreground leading-relaxed">
             <strong className="font-bold text-foreground">
-              Demo Authentication (Phase 1):
+              Local Session (Phase 1):
             </strong>{' '}
-            This frontend preview uses a local demo session stored in your
-            browser. No real passwords are stored, and Phase 2 replaces this
-            with Supabase Auth.
+            Your financial records are stored cleanly in browser{' '}
+            <code className="font-semibold text-foreground">localStorage</code>{' '}
+            with zero pre-seeded mock transactions.
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -157,7 +156,7 @@ export function LoginPage() {
               label="Password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
-              placeholder="Enter password"
+              placeholder="Minimum 4 characters"
               leftAdornment={<Lock className="h-4 w-4" />}
               rightAdornment={
                 <button
@@ -216,15 +215,15 @@ export function LoginPage() {
       <Modal
         open={forgotOpen}
         onClose={() => setForgotOpen(false)}
-        title="Password Recovery (Demo Mode)"
+        title="Password Recovery (Local Mode)"
         description="Information about authentication in Phase 1."
       >
         <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
           <p>
-            FinTrack is currently running in <strong className="text-foreground">Phase 1 Demo Mode</strong> using local browser storage. Any password of at least 4 characters works with the demo form.
+            FinTrack is running in <strong className="text-foreground">Phase 1 LocalStorage Mode</strong> without a backend server. Any valid email and password (4+ characters) opens your local session.
           </p>
           <p>
-            When Supabase Auth is connected in Phase 2, this action will trigger a secure password-reset email flow.
+            When Supabase Auth is connected in Phase 2, this action will send a password-reset email.
           </p>
           <Button className="w-full" onClick={() => setForgotOpen(false)}>
             Got it

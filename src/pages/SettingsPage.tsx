@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Database, RotateCcw, Shield } from 'lucide-react';
+import { Check, Database, Shield, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -15,7 +15,7 @@ import { formatRupeeInputValue, rupeesToPaise } from '@/utils/currency';
 
 export function SettingsPage() {
   const { user, updateProfile, signOut } = useAuth();
-  const { resetDemoData } = useFinance();
+  const { clearAllData } = useFinance();
   const { showToast } = useToast();
 
   const [name, setName] = useState(user?.name ?? '');
@@ -23,8 +23,8 @@ export function SettingsPage() {
     formatRupeeInputValue(user?.initialOpeningBalancePaise ?? 0),
   );
   const [savingProfile, setSavingProfile] = useState(false);
-  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   const handleSaveProfile = async () => {
     setSavingProfile(true);
@@ -43,13 +43,14 @@ export function SettingsPage() {
     }
   };
 
-  const handleResetDemo = async () => {
-    setIsResetting(true);
+  const handleClearData = async () => {
+    setIsClearing(true);
     try {
-      await resetDemoData();
-      setResetConfirmOpen(false);
+      await clearAllData();
+      setOpeningBalance('');
+      setClearConfirmOpen(false);
     } finally {
-      setIsResetting(false);
+      setIsClearing(false);
     }
   };
 
@@ -118,7 +119,7 @@ export function SettingsPage() {
         <ThemeToggle showLabel />
       </section>
 
-      {/* Demo Data & Architecture Status */}
+      {/* LocalStorage Controls */}
       <section className="rounded-[24px] border border-border bg-surface p-5 sm:p-6 shadow-card dark:shadow-card-dark space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
@@ -127,12 +128,15 @@ export function SettingsPage() {
             </div>
             <div>
               <h3 className="text-base font-bold text-foreground">
-                Data Storage & Demo Controls
+                LocalStorage Persistence
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Phase 1 uses LocalStorage repositories with realistic temporary
-                demo data (₹15,000 salary, ₹11,900 fixed commitments, ₹3,100
-                personal budget).
+                All transactions, budgets, EMIs, categories, and savings goals
+                are stored locally in browser{' '}
+                <code className="font-semibold text-foreground">
+                  localStorage
+                </code>
+                .
               </p>
             </div>
           </div>
@@ -144,10 +148,10 @@ export function SettingsPage() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
           <Button
             variant="outline"
-            onClick={() => setResetConfirmOpen(true)}
-            leftIcon={<RotateCcw className="h-4 w-4" />}
+            onClick={() => setClearConfirmOpen(true)}
+            leftIcon={<Trash2 className="h-4 w-4" />}
           >
-            Reset Demo Data
+            Clear All Local Data
           </Button>
 
           <Button
@@ -161,13 +165,13 @@ export function SettingsPage() {
       </section>
 
       <ConfirmationDialog
-        open={resetConfirmOpen}
-        onClose={() => setResetConfirmOpen(false)}
-        onConfirm={handleResetDemo}
-        isLoading={isResetting}
-        title="Reset Demo Data?"
-        description="This will restore the default demo transactions, ₹15,000 budget plan, AC EMI schedule, and savings goals."
-        confirmLabel="Reset Data"
+        open={clearConfirmOpen}
+        onClose={() => setClearConfirmOpen(false)}
+        onConfirm={handleClearData}
+        isLoading={isClearing}
+        title="Clear All Local Data?"
+        description="This will permanently clear all transactions, budget settings, EMI schedules, and savings goals from localStorage so you can start fresh."
+        confirmLabel="Clear Everything"
       />
     </div>
   );

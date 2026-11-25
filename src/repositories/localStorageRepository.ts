@@ -1,5 +1,8 @@
-import { DEFAULT_USER_ID, createDefaultBudgetConfig } from '@/data/defaults';
-import { DEMO_USER, createDemoDataset } from '@/data/demoData';
+import {
+  DEFAULT_CATEGORIES,
+  DEFAULT_USER_ID,
+  createEmptyBudgetConfig,
+} from '@/data/defaults';
 import { generateId } from '@/lib/utils';
 import type {
   CreateTransactionInput,
@@ -22,8 +25,8 @@ import type {
   UserProfile,
 } from '@/types/finance';
 
-const DATA_STORAGE_KEY = 'fintrack_phase1_data_v1';
-const SESSION_STORAGE_KEY = 'fintrack_phase1_session_v1';
+const DATA_STORAGE_KEY = 'fintrack_local_data_v2';
+const SESSION_STORAGE_KEY = 'fintrack_local_session_v2';
 
 interface StoredFinanceState {
   user: UserProfile;
@@ -33,6 +36,39 @@ interface StoredFinanceState {
   emis: EMIItem[];
   savingsGoals: SavingsGoal[];
   savingsTransfers: SavingsTransfer[];
+}
+
+function createEmptyState(email = ''): StoredFinanceState {
+  const user: UserProfile = {
+    id: DEFAULT_USER_ID,
+    name: email ? deriveNameFromEmail(email) : 'FinTrack User',
+    email,
+    currency: 'INR',
+    timezone: 'Asia/Kolkata',
+    initialOpeningBalancePaise: 0,
+    isDemoUser: false,
+  };
+
+  return {
+    user,
+    categories: DEFAULT_CATEGORIES,
+    budgetsByMonth: {
+      default: createEmptyBudgetConfig(user.id, 'default'),
+    },
+    transactions: [],
+    emis: [],
+    savingsGoals: [],
+    savingsTransfers: [],
+  };
+}
+
+function deriveNameFromEmail(email: string): string {
+  const local = email.split('@')[0]?.trim() || 'FinTrack User';
+  return local
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 }
 
 function readState(): StoredFinanceState {
@@ -45,21 +81,9 @@ function readState(): StoredFinanceState {
       }
     }
   } catch {
-    // Corrupted local state falls back to fresh demo data
+    // Corrupted local state falls back to a clean empty workspace
   }
-  const seeded = createDemoDataset();
-  const initial: StoredFinanceState = {
-    user: seeded.user,
-    categories: seeded.categories,
-    budgetsByMonth: {
-      default: createDefaultBudgetConfig(seeded.user.id, 'default'),
-      [seeded.budgetConfig.monthKey]: seeded.budgetConfig,
-    },
-    transactions: seeded.transactions,
-    emis: seeded.emis,
-    savingsGoals: seeded.savingsGoals,
-    savingsTransfers: seeded.savingsTransfers,
-  };
+  const initial = createEmptyState();
   writeState(initial);
   return initial;
 }
@@ -82,11 +106,16 @@ class LocalStorageAuthRepository implements IAuthRepository {
   }
 
   async signIn(credentials: SignInCredentials): Promise<AuthSession> {
-    // Phase 1 demo authentication only — no real password storage or claims of cryptographic security.
+    // Phase 1 local browser session — Phase 2 replaces this with Supabase Auth.
     const state = readState();
+    const trimmedEmail = credentials.email.trim();
     const user: UserProfile = {
       ...state.user,
-      email: credentials.email.trim() || DEMO_USER.email,
+      email: trimmedEmail,
+      name:
+        state.user.name === 'FinTrack User' && trimmedEmail
+          ? deriveNameFromEmail(trimmedEmail)
+          : state.user.name,
     };
     state.user = user;
     writeState(state);
@@ -201,7 +230,6 @@ class LocalStorageTransactionRepository implements ITransactionRepository {
     const target = state.transactions.find((t) => t.id === id);
     state.transactions = state.transactions.filter((t) => t.id !== id);
 
-    // If a linked EMI transaction is deleted, keep EMI payment history consistent
     if (target?.emiId && target.emiInstallmentKey) {
       state.emis = state.emis.map((emi) => {
         if (emi.id !== target.emiId) return emi;
@@ -231,7 +259,7 @@ class LocalStorageBudgetRepository implements IBudgetRepository {
     if (exact) return exact;
 
     const base =
-      state.budgetsByMonth.default ?? createDefaultBudgetConfig(userId, 'default');
+      state.budgetsByMonth.default ?? createEmptyBudgetConfig(userId, 'default');
     return {
       ...base,
       id: `budget_${monthKey}`,
@@ -249,7 +277,6 @@ class LocalStorageBudgetRepository implements IBudgetRepository {
       updatedAt: new Date().toISOString(),
     };
     state.budgetsByMonth[config.monthKey] = updated;
-    // Also update default template so subsequent months inherit user's latest plan
     state.budgetsByMonth.default = {
       ...updated,
       id: 'budget_default',
@@ -359,9 +386,11 @@ export function createLocalStorageRepositories(): IDataRepositorySet {
     budgets: new LocalStorageBudgetRepository(),
     emis: new LocalStorageEMIRepository(),
     savings: new LocalStorageSavingsRepository(),
-    async resetDemoData() {
-      localStorage.removeItem(DATA_STORAGE_KEY);
-      readState();
+    async clearAllData() {
+      const current = readState();
+      const blank = createEmptyState(current.user.email);
+      blank.user.name = current.user.name;
+      writeState(blank);
     },
   };
 }

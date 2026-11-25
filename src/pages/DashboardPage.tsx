@@ -309,54 +309,70 @@ export function DashboardPage() {
           </div>
 
           <div className="space-y-2.5">
-            {upcomingFixedPayments.map((fp) => (
-              <div
-                key={fp.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface-secondary/40 px-4 py-3"
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-bold text-foreground">
-                      {fp.label}
-                    </span>
-                    {fp.isPaid ? (
-                      <Badge variant="default">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Paid
-                      </Badge>
-                    ) : (
-                      <Badge variant="striped">
-                        <CalendarClock className="h-3 w-3" />
-                        Due {fp.dueDay}th
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
-                    Planned:{' '}
-                    {formatINR(fp.amountPaise, { hideValue: hideBalances })}
-                  </p>
-                </div>
-
-                {!fp.isPaid && (
+            {upcomingFixedPayments.length === 0 ? (
+              <EmptyState
+                title="No fixed commitments set"
+                description="Configure planned fixed payments in Monthly Budget to track due items here."
+                action={
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => {
-                      if (fp.categoryId === 'ac_emi') {
-                        navigate('/emi');
-                      } else {
-                        openQuickAdd({
-                          type: 'expense',
-                          categoryId: fp.categoryId,
-                        });
-                      }
-                    }}
+                    onClick={() => navigate('/budget')}
                   >
-                    Record
+                    Configure Budget
                   </Button>
-                )}
-              </div>
-            ))}
+                }
+              />
+            ) : (
+              upcomingFixedPayments.map((fp) => (
+                <div
+                  key={fp.id}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface-secondary/40 px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-bold text-foreground">
+                        {fp.label}
+                      </span>
+                      {fp.isPaid ? (
+                        <Badge variant="default">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Paid
+                        </Badge>
+                      ) : (
+                        <Badge variant="striped">
+                          <CalendarClock className="h-3 w-3" />
+                          Due {fp.dueDay}th
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+                      Planned:{' '}
+                      {formatINR(fp.amountPaise, { hideValue: hideBalances })}
+                    </p>
+                  </div>
+
+                  {!fp.isPaid && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        if (fp.categoryId === 'ac_emi') {
+                          navigate('/emi');
+                        } else {
+                          openQuickAdd({
+                            type: 'expense',
+                            categoryId: fp.categoryId,
+                          });
+                        }
+                      }}
+                    >
+                      Record
+                    </Button>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </section>
 

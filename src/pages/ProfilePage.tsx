@@ -88,7 +88,7 @@ export function ProfilePage() {
               <h2 className="text-lg font-extrabold text-foreground">
                 {user?.name ?? 'FinTrack User'}
               </h2>
-              <Badge variant="outline">Demo Mode</Badge>
+              <Badge variant="outline">LocalStorage</Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {user?.email}

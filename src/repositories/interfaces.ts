@@ -73,5 +73,5 @@ export interface IDataRepositorySet {
   budgets: IBudgetRepository;
   emis: IEMIRepository;
   savings: ISavingsRepository;
-  resetDemoData(): Promise<void>;
+  clearAllData(): Promise<void>;
 }

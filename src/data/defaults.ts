@@ -1,6 +1,6 @@
 import type { BudgetConfig, Category } from '@/types/finance';
 
-export const DEFAULT_USER_ID = 'demo-user-1';
+export const DEFAULT_USER_ID = 'local-user';
 
 export const DEFAULT_CATEGORIES: Category[] = [
   // Income categories
@@ -141,6 +141,21 @@ export const DEFAULT_CATEGORIES: Category[] = [
   },
 ];
 
+export function createEmptyBudgetConfig(
+  userId: string = DEFAULT_USER_ID,
+  monthKey = 'default',
+): BudgetConfig {
+  return {
+    id: `budget_${monthKey}`,
+    userId,
+    monthKey,
+    plannedSalaryPaise: 0,
+    plannedFixedPayments: [],
+    categoryAllocationsPaise: {},
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 export function createDefaultBudgetConfig(
   userId: string = DEFAULT_USER_ID,
   monthKey = 'default',
@@ -185,13 +200,13 @@ export function createDefaultBudgetConfig(
       },
     ],
     categoryAllocationsPaise: {
-      petrol: 90000, // ₹900
-      food: 110000, // ₹1,100
-      games: 30000, // ₹300
-      mobile_recharge: 30000, // ₹300
-      shopping: 25000, // ₹250
-      medical: 15000, // ₹150
-      other_expenses: 10000, // ₹100
+      petrol: 90000,
+      food: 110000,
+      games: 30000,
+      mobile_recharge: 30000,
+      shopping: 25000,
+      medical: 15000,
+      other_expenses: 10000,
     },
     updatedAt: new Date().toISOString(),
   };

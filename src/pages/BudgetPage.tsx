@@ -4,24 +4,37 @@ import {
   CalendarDays,
   Check,
   Pencil,
+  Plus,
+  Trash2,
   Wallet,
 } from 'lucide-react';
 import { BudgetProgressCard } from '@/components/finance/BudgetProgressCard';
 import { StatCard } from '@/components/finance/StatCard';
 import { Badge } from '@/components/ui/Badge';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
+import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
-import { BottomSheet } from '@/components/ui/BottomSheet';
+import { Select } from '@/components/ui/Select';
 import { useFinance } from '@/contexts/FinanceContext';
 import { useIsMobile } from '@/hooks/useMediaQuery';
-import type { BudgetConfig } from '@/types/finance';
+import { generateId } from '@/lib/utils';
+import type { BudgetConfig, PlannedFixedPayment } from '@/types/finance';
 import {
   formatINR,
   formatRupeeInputValue,
   rupeesToPaise,
 } from '@/utils/currency';
 import { formatMonthYear } from '@/utils/date';
+
+interface DraftFixedRow {
+  id: string;
+  categoryId: string;
+  label: string;
+  amount: string;
+  dueDay: string;
+}
 
 export function BudgetPage() {
   const {
@@ -38,19 +51,28 @@ export function BudgetPage() {
   const [editOpen, setEditOpen] = useState(false);
 
   const [plannedSalaryInput, setPlannedSalaryInput] = useState('');
-  const [fixedInputs, setFixedInputs] = useState<Record<string, string>>({});
+  const [draftFixedRows, setDraftFixedRows] = useState<DraftFixedRow[]>([]);
   const [allocInputs, setAllocInputs] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
+
+  const fixedCategories = useMemo(
+    () => categories.filter((c) => c.type === 'expense'),
+    [categories],
+  );
 
   const openEditModal = () => {
     setPlannedSalaryInput(
       formatRupeeInputValue(budgetConfig.plannedSalaryPaise),
     );
-    const fx: Record<string, string> = {};
-    for (const fp of budgetConfig.plannedFixedPayments) {
-      fx[fp.id] = formatRupeeInputValue(fp.amountPaise);
-    }
-    setFixedInputs(fx);
+    setDraftFixedRows(
+      budgetConfig.plannedFixedPayments.map((fp) => ({
+        id: fp.id,
+        categoryId: fp.categoryId,
+        label: fp.label,
+        amount: formatRupeeInputValue(fp.amountPaise),
+        dueDay: String(fp.dueDay),
+      })),
+    );
 
     const al: Record<string, string> = {};
     for (const cat of categories) {
@@ -64,6 +86,32 @@ export function BudgetPage() {
     setEditOpen(true);
   };
 
+  const addFixedRow = () => {
+    const defaultCat =
+      categories.find((c) => c.type === 'expense' && c.expenseGroup === 'fixed') ??
+      fixedCategories[0];
+    setDraftFixedRows((prev) => [
+      ...prev,
+      {
+        id: generateId('fp'),
+        categoryId: defaultCat?.id ?? 'other_expenses',
+        label: defaultCat?.name ?? 'Fixed Payment',
+        amount: '',
+        dueDay: '5',
+      },
+    ]);
+  };
+
+  const removeFixedRow = (id: string) => {
+    setDraftFixedRows((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  const updateFixedRow = (id: string, patch: Partial<DraftFixedRow>) => {
+    setDraftFixedRows((prev) =>
+      prev.map((row) => (row.id === id ? { ...row, ...patch } : row)),
+    );
+  };
+
   const categoryMap = useMemo(
     () => new Map(categories.map((c) => [c.id, c])),
     [categories],
@@ -75,8 +123,8 @@ export function BudgetPage() {
   );
 
   const draftPlannedSalary = rupeesToPaise(plannedSalaryInput);
-  const draftFixedTotal = budgetConfig.plannedFixedPayments.reduce(
-    (sum, fp) => sum + rupeesToPaise(fixedInputs[fp.id] ?? '0'),
+  const draftFixedTotal = draftFixedRows.reduce(
+    (sum, row) => sum + rupeesToPaise(row.amount),
     0,
   );
   const draftPersonalBudget = draftPlannedSalary - draftFixedTotal;
@@ -93,13 +141,21 @@ export function BudgetPage() {
         nextAllocations[catId] = rupeesToPaise(strVal);
       }
 
+      const nextFixed: PlannedFixedPayment[] = draftFixedRows
+        .filter((r) => r.label.trim() && rupeesToPaise(r.amount) > 0)
+        .map((r) => ({
+          id: r.id,
+          categoryId: r.categoryId,
+          label: r.label.trim(),
+          amountPaise: rupeesToPaise(r.amount),
+          dueDay: Math.min(28, Math.max(1, parseInt(r.dueDay, 10) || 1)),
+          active: true,
+        }));
+
       const nextConfig: BudgetConfig = {
         ...budgetConfig,
         plannedSalaryPaise: draftPlannedSalary,
-        plannedFixedPayments: budgetConfig.plannedFixedPayments.map((fp) => ({
-          ...fp,
-          amountPaise: rupeesToPaise(fixedInputs[fp.id] ?? '0'),
-        })),
+        plannedFixedPayments: nextFixed,
         categoryAllocationsPaise: nextAllocations,
       };
       await saveBudgetConfig(nextConfig);
@@ -127,22 +183,92 @@ export function BudgetPage() {
         </div>
       </div>
 
-      <div className="space-y-2.5">
-        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-          Planned Fixed Commitments
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {budgetConfig.plannedFixedPayments.map((fp) => (
-            <CurrencyInput
-              key={fp.id}
-              label={fp.label}
-              value={fixedInputs[fp.id] ?? ''}
-              onChange={(val) =>
-                setFixedInputs((prev) => ({ ...prev, [fp.id]: val }))
-              }
-            />
-          ))}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Planned Fixed Commitments
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={addFixedRow}
+            leftIcon={<Plus className="h-3.5 w-3.5" />}
+          >
+            Add Fixed Payment
+          </Button>
         </div>
+
+        {draftFixedRows.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-border p-4 text-xs text-muted-foreground text-center">
+            No planned fixed payments added yet. Click &ldquo;Add Fixed Payment&rdquo; to add commitments like EMI or family support.
+          </p>
+        ) : (
+          <div className="space-y-3 max-h-[240px] overflow-y-auto pr-1">
+            {draftFixedRows.map((row) => (
+              <div
+                key={row.id}
+                className="rounded-2xl border border-border bg-surface-secondary/40 p-3 space-y-2.5"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <Select
+                    label="Category"
+                    value={row.categoryId}
+                    onChange={(e) => {
+                      const cat = categoryMap.get(e.target.value);
+                      updateFixedRow(row.id, {
+                        categoryId: e.target.value,
+                        label: cat?.name ?? row.label,
+                      });
+                    }}
+                    options={fixedCategories.map((c) => ({
+                      value: c.id,
+                      label: c.name,
+                    }))}
+                  />
+                  <Input
+                    label="Label"
+                    value={row.label}
+                    onChange={(e) =>
+                      updateFixedRow(row.id, { label: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="flex items-end gap-2.5">
+                  <div className="flex-1">
+                    <CurrencyInput
+                      label="Amount"
+                      value={row.amount}
+                      onChange={(val) =>
+                        updateFixedRow(row.id, { amount: val })
+                      }
+                    />
+                  </div>
+                  <div className="w-24">
+                    <Input
+                      label="Due Day"
+                      type="number"
+                      min={1}
+                      max={28}
+                      value={row.dueDay}
+                      onChange={(e) =>
+                        updateFixedRow(row.id, { dueDay: e.target.value })
+                      }
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFixedRow(row.id)}
+                    aria-label="Remove fixed payment"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface-hover hover:text-foreground"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2.5">
@@ -154,7 +280,7 @@ export function BudgetPage() {
             Allocated: {formatINR(draftAllocatedSum)}
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[240px] overflow-y-auto pr-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1">
           {categories
             .filter((c) => c.type === 'expense' && c.expenseGroup !== 'fixed')
             .map((cat) => (
@@ -333,7 +459,7 @@ export function BudgetPage() {
           open={editOpen}
           onClose={() => setEditOpen(false)}
           title="Edit Monthly Budget"
-          description="Adjust salary plan, fixed commitments, and category limits."
+          description="Set salary plan, fixed commitments, and category limits."
         >
           {editFormBody}
         </BottomSheet>
@@ -342,7 +468,7 @@ export function BudgetPage() {
           open={editOpen}
           onClose={() => setEditOpen(false)}
           title="Edit Monthly Budget"
-          description="Adjust salary plan, fixed commitments, and category limits."
+          description="Set salary plan, fixed commitments, and category limits."
           maxWidthClass="max-w-2xl"
         >
           {editFormBody}
