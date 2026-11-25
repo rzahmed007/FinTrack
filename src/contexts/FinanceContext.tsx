@@ -170,12 +170,35 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   }, [repos, userId, monthKey]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      void refreshAll();
-    } else {
-      setIsLoading(false);
+    if (!isAuthenticated) {
+      return;
     }
-  }, [isAuthenticated, refreshAll]);
+    let active = true;
+    Promise.all([
+      repos.transactions.list(userId),
+      repos.budgets.listCategories(userId),
+      repos.budgets.getBudgetConfig(userId, monthKey),
+      repos.emis.list(userId),
+      repos.savings.listGoals(userId),
+      repos.savings.listTransfers(userId),
+    ])
+      .then(([txList, catList, budget, emiList, goalList, transferList]) => {
+        if (!active) return;
+        setTransactions(txList);
+        setCategories(catList);
+        setBudgetConfig(budget);
+        setEmis(emiList);
+        setSavingsGoals(goalList);
+        setSavingsTransfers(transferList);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated, repos, userId, monthKey]);
 
   const toggleHideBalances = useCallback(() => {
     setHideBalances((prev) => {
