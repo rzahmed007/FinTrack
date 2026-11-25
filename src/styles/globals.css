@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f7f7;
+  --bg-card: #ffffff;
+  --bg-hover: #f0f0f0;
+  --text-primary: #171717;
+  --text-secondary: #737373;
+  --border-color: #e5e5e5;
+  --btn-primary-bg: #000000;
+  --btn-primary-text: #ffffff;
+  --chart-1: #000000;
+  --chart-2: #404040;
+  --chart-3: #737373;
+  --chart-4: #a3a3a3;
+  --chart-5: #d4d4d4;
+}
+
+.dark {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #202020;
+  --bg-card: #171717;
+  --bg-hover: #262626;
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --border-color: #303030;
+  --btn-primary-bg: #ffffff;
+  --btn-primary-text: #000000;
+  --chart-1: #ffffff;
+  --chart-2: #d4d4d4;
+  --chart-3: #a3a3a3;
+  --chart-4: #737373;
+  --chart-5: #404040;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Monochrome diagonal stripe pattern for differentiating fixed vs variable or overspending without color */
+.pattern-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    rgba(115, 115, 115, 0.22) 4px,
+    rgba(115, 115, 115, 0.22) 8px
+  );
+}
+
+.dark .pattern-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    rgba(255, 255, 255, 0.16) 4px,
+    rgba(255, 255, 255, 0.16) 8px
+  );
+}
+
+.safe-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-pt {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Subtle custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 9999px;
+}
