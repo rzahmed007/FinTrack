@@ -15,7 +15,7 @@ import { IncomePage } from '@/pages/IncomePage';
 import { LoginPage } from '@/pages/LoginPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { ReportsPage } from '@/pages/ReportsPage';
-import { SavingsPage } from '@/pages/SavingsPage';
+// import { SavingsPage } from '@/pages/SavingsPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { TransactionsPage } from '@/pages/TransactionsPage';
 
@@ -40,7 +40,7 @@ export function App() {
                       <Route path="/expenses" element={<ExpensesPage />} />
                       <Route path="/budget" element={<BudgetPage />} />
                       {/* <Route path="/emi" element={<EMIPage />} /> */}
-                      <Route path="/savings" element={<SavingsPage />} />
+                      {/* <Route path="/savings" element={<SavingsPage />} /> */}
                       <Route path="/reports" element={<ReportsPage />} />
                       <Route path="/categories" element={<CategoriesPage />} />
                       <Route path="/settings" element={<SettingsPage />} />

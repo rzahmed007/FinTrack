@@ -5,7 +5,7 @@ import {
   // CalendarClock,
   ChevronRight,
   LogOut,
-  PiggyBank,
+  // PiggyBank,
   Settings,
   Tags,
   Wallet,
@@ -41,12 +41,12 @@ const MODULE_LINKS = [
   //   path: '/emi',
   //   icon: CalendarClock,
   // },
-  {
-    title: 'Savings',
-    subtitle: 'Goal reserves separated from expenses',
-    path: '/savings',
-    icon: PiggyBank,
-  },
+  // {
+  //   title: 'Savings',
+  //   subtitle: 'Goal reserves separated from expenses',
+  //   path: '/savings',
+  //   icon: PiggyBank,
+  // },
   {
     title: 'Reports',
     subtitle: 'Daily, weekly, monthly, yearly & CSV export',
