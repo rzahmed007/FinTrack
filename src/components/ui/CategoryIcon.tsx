@@ -1,10 +1,18 @@
 import {
   BookOpen,
   Briefcase,
+  Car,
+  Coffee,
+  CreditCard,
+  Dumbbell,
   Fuel,
   Gamepad2,
+  Gift,
   HeartHandshake,
+  Home,
   Laptop,
+  Music,
+  Plane,
   PlusCircle,
   Receipt,
   ShoppingBag,
@@ -14,10 +22,16 @@ import {
   UserCheck,
   Users,
   Utensils,
+  Wifi,
   Wind,
+  Zap,
 } from 'lucide-react';
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+export const CATEGORY_ICON_MAP: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
+  Tag,
   Briefcase,
   HeartHandshake,
   Laptop,
@@ -33,7 +47,19 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   ShoppingBag,
   Stethoscope,
   Receipt,
+  Wifi,
+  Car,
+  Home,
+  Coffee,
+  Dumbbell,
+  Plane,
+  Zap,
+  CreditCard,
+  Gift,
+  Music,
 };
+
+export const CATEGORY_ICON_NAMES = Object.keys(CATEGORY_ICON_MAP);
 
 export function CategoryIcon({
   icon,
@@ -42,6 +68,6 @@ export function CategoryIcon({
   icon?: string;
   className?: string;
 }) {
-  const Icon = (icon && ICON_MAP[icon]) || Tag;
+  const Icon = (icon && CATEGORY_ICON_MAP[icon]) || Tag;
   return <Icon className={className} aria-hidden="true" />;
 }
