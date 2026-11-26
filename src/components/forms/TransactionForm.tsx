@@ -4,10 +4,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { ArrowDownLeft, ArrowUpRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { useFinance } from '@/contexts/FinanceContext';
 import { cn } from '@/lib/utils';
 import type { CategoryId, Transaction, TransactionType } from '@/types/finance';
@@ -59,7 +59,12 @@ export function TransactionForm({
       );
       if (matched) return matched.id;
     }
-    return t === 'income' ? 'salary' : 'food';
+    const preferredId = t === 'income' ? 'salary' : 'food';
+    const preferred = categories.find(
+      (c) => c.id === preferredId && c.type === t,
+    );
+    if (preferred) return preferred.id;
+    return categories.find((c) => c.type === t)?.id ?? '';
   };
 
   const {
@@ -169,42 +174,36 @@ export function TransactionForm({
         )}
       />
 
-      {/* Quick Category Chip Grid */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Category
-          </span>
-          {errors.categoryId && (
-            <span className="text-xs font-medium text-foreground">
-              {errors.categoryId.message}
-            </span>
-          )}
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[210px] overflow-y-auto pr-0.5">
-          {filteredCategories.map((cat) => {
-            const selected = activeCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() =>
-                  setValue('categoryId', cat.id, { shouldValidate: true })
-                }
-                className={cn(
-                  'flex min-h-[44px] items-center gap-2 rounded-2xl border px-3 py-2 text-left text-xs font-semibold transition-all',
-                  selected
-                    ? 'border-foreground bg-primary text-primary-foreground'
-                    : 'border-border bg-surface text-foreground hover:bg-surface-hover',
-                )}
-              >
-                <CategoryIcon icon={cat.icon} className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{cat.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {/* Category Dropdown */}
+      <Controller
+        control={control}
+        name="categoryId"
+        render={({ field }) => (
+          <Select
+            label="Category"
+            value={field.value}
+            onChange={field.onChange}
+            error={errors.categoryId?.message}
+            options={
+              filteredCategories.length === 0
+                ? [
+                    {
+                      value: '',
+                      label: `No ${activeType} categories — add one in Categories`,
+                      disabled: true,
+                    },
+                  ]
+                : filteredCategories.map((cat) => ({
+                    value: cat.id,
+                    label:
+                      activeType === 'expense' && cat.expenseGroup
+                        ? `${cat.name} (${cat.expenseGroup === 'fixed' ? 'Fixed' : 'Personal'})`
+                        : cat.name,
+                  }))
+            }
+          />
+        )}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <Controller
