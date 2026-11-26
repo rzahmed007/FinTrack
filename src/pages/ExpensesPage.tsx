@@ -128,7 +128,7 @@ export function ExpensesPage() {
             hideValue: hideBalances,
           })}
           icon={<ShieldCheck className="h-4 w-4" />}
-          subtitle="AC EMI, Parents, Dad, Madrasa"
+          subtitle="Parents, Dad, Madrasa & fixed commitments"
         />
         <StatCard
           label="Monthly Personal"

@@ -38,15 +38,15 @@ export const DEFAULT_CATEGORIES: Category[] = [
   },
 
   // Fixed Expense categories
-  {
-    id: 'ac_emi',
-    name: 'AC EMI',
-    type: 'expense',
-    expenseGroup: 'fixed',
-    icon: 'Wind',
-    isDefault: true,
-    sortOrder: 1,
-  },
+  // {
+  //   id: 'ac_emi',
+  //   name: 'AC EMI',
+  //   type: 'expense',
+  //   expenseGroup: 'fixed',
+  //   icon: 'Wind',
+  //   isDefault: true,
+  //   sortOrder: 1,
+  // },
   {
     id: 'parents',
     name: 'Parents',

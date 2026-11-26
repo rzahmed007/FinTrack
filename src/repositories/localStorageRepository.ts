@@ -77,6 +77,19 @@ function readState(): StoredFinanceState {
     if (raw) {
       const parsed = JSON.parse(raw) as StoredFinanceState;
       if (parsed && Array.isArray(parsed.transactions)) {
+        const hasEmiTx = parsed.transactions.some(
+          (tx) => tx.categoryId === 'ac_emi',
+        );
+        if (
+          !hasEmiTx &&
+          Array.isArray(parsed.categories) &&
+          parsed.categories.some((c) => c.id === 'ac_emi' && c.isDefault)
+        ) {
+          parsed.categories = parsed.categories.filter(
+            (c) => !(c.id === 'ac_emi' && c.isDefault),
+          );
+          writeState(parsed);
+        }
         return parsed;
       }
     }
