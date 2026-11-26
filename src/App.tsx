@@ -9,7 +9,7 @@ import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
 import { BudgetPage } from '@/pages/BudgetPage';
 import { CategoriesPage } from '@/pages/CategoriesPage';
 import { DashboardPage } from '@/pages/DashboardPage';
-import { EMIPage } from '@/pages/EMIPage';
+// import { EMIPage } from '@/pages/EMIPage';
 import { ExpensesPage } from '@/pages/ExpensesPage';
 import { IncomePage } from '@/pages/IncomePage';
 import { LoginPage } from '@/pages/LoginPage';
@@ -39,7 +39,7 @@ export function App() {
                       <Route path="/income" element={<IncomePage />} />
                       <Route path="/expenses" element={<ExpensesPage />} />
                       <Route path="/budget" element={<BudgetPage />} />
-                      <Route path="/emi" element={<EMIPage />} />
+                      {/* <Route path="/emi" element={<EMIPage />} /> */}
                       <Route path="/savings" element={<SavingsPage />} />
                       <Route path="/reports" element={<ReportsPage />} />
                       <Route path="/categories" element={<CategoriesPage />} />

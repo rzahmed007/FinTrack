@@ -2,7 +2,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   BarChart3,
-  CalendarClock,
+  // CalendarClock,
   ChevronRight,
   LogOut,
   PiggyBank,
@@ -35,12 +35,12 @@ const MODULE_LINKS = [
     path: '/budget',
     icon: Wallet,
   },
-  {
-    title: 'EMI Management',
-    subtitle: 'AC EMI installments & duplicate-safe tracking',
-    path: '/emi',
-    icon: CalendarClock,
-  },
+  // {
+  //   title: 'EMI Management',
+  //   subtitle: 'AC EMI installments & duplicate-safe tracking',
+  //   path: '/emi',
+  //   icon: CalendarClock,
+  // },
   {
     title: 'Savings',
     subtitle: 'Goal reserves separated from expenses',

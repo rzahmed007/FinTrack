@@ -105,7 +105,7 @@ export function DashboardPage() {
         onToggleHide={toggleHideBalances}
         onAddIncome={() => openQuickAdd({ type: 'income', categoryId: 'salary' })}
         onAddExpense={() => openQuickAdd({ type: 'expense', categoryId: 'food' })}
-        onRecordEMI={() => navigate('/emi')}
+        // onRecordEMI={() => navigate('/emi')}
       />
 
       {/* Overspending Alert Banner (only when personal budget exceeded) */}
@@ -357,14 +357,14 @@ export function DashboardPage() {
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        if (fp.categoryId === 'ac_emi') {
-                          navigate('/emi');
-                        } else {
-                          openQuickAdd({
-                            type: 'expense',
-                            categoryId: fp.categoryId,
-                          });
-                        }
+                        // if (fp.categoryId === 'ac_emi') {
+                        //   navigate('/emi');
+                        // } else {
+                        openQuickAdd({
+                          type: 'expense',
+                          categoryId: fp.categoryId,
+                        });
+                        // }
                       }}
                     >
                       Record

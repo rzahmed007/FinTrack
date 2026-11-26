@@ -2,7 +2,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  CalendarClock,
+  // CalendarClock,
   Eye,
   EyeOff,
   TrendingDown,
@@ -20,7 +20,7 @@ export interface BalanceCardProps {
   onToggleHide: () => void;
   onAddIncome: () => void;
   onAddExpense: () => void;
-  onRecordEMI: () => void;
+  // onRecordEMI?: () => void;
 }
 
 export function BalanceCard({
@@ -32,7 +32,6 @@ export function BalanceCard({
   onToggleHide,
   onAddIncome,
   onAddExpense,
-  onRecordEMI,
 }: BalanceCardProps) {
   const prefersReduced = useReducedMotion();
 
@@ -119,14 +118,14 @@ export function BalanceCard({
         >
           Add Income
         </Button>
-        <Button
+        {/* <Button
           onClick={onRecordEMI}
           variant="outline"
           className="border-white/30 bg-transparent text-white hover:bg-white/15 w-full sm:w-auto"
           leftIcon={<CalendarClock className="h-4 w-4" />}
         >
           Record EMI Payment
-        </Button>
+        </Button> */}
       </div>
     </motion.section>
   );
